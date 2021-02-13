@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.icu.text.Transliterator;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -174,6 +175,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+//            marker.remove();
+                LatLng f = marker.getPosition();
+                for(int m = 0; m < markers.size(); m++) {
+                    if(Math.abs(markers.get(m).getPosition().latitude - f.latitude) < 0.05 && Math.abs(markers.get(m).getPosition().longitude - f.longitude) < 0.05) {
+
+                        markers.remove(m);
+                        break;
+                    }
+                }
+                if(shape!=null)
+                {
+                    shape.remove();
+                }
+
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+//                drawShapeLine();
+//                drawShapeLine();
+//                if(markers.size()==4)
+//                {
+//                    drawShape();
+//                }
+            }
+        });
         mMap.setOnMarkerClickListener(marker -> {
             LatLng currentMarker =  marker.getPosition();
             String place = "";
@@ -193,6 +231,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                location.setLatitude(latLng.latitude);
 //                location.setLongitude(latLng.longitude);
             // set marker
+
+
+//            for(int m = 0; m < markers.size(); m++) {
+//                if(Math.abs(markers.get(m).getPosition().latitude - latLng.latitude) < 0.05 && Math.abs(markers.get(m).getPosition().longitude - latLng.longitude) < 0.05) {
+//
+////                    markers.remove(m);
+//                    break;
+//                }
+//            }
 //                setMarker(latLng);
         });
 
@@ -233,16 +280,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+    Polyline poly;
+    Polyline poly1;
+    Polyline poly2;
+    Polyline poly3;
+    List<Polyline> polylines= new ArrayList<Polyline>();
     private void drawShapeLine() {
 
-
+        for(int r =0 ;r<=polylines.size()-1;r++)
+        {
+            polylines.get(r).remove();
+        }
+        if(poly!=null) {
+            poly.remove();
+        }
+        if(poly1!=null) {
+            poly1.remove();
+        }
+        if(poly2!=null) {
+            poly2.remove();
+        }
+        if(poly3!=null) {
+            poly3.remove();
+        }
 
 
         if(markers.size()==2) {
             PolylineOptions options = new PolylineOptions().color(Color.RED);
             options.add(markers.get(0).getPosition());
             options.add(markers.get(1).getPosition());
-            mMap.addPolyline(options).setClickable(true);
+            poly =  mMap.addPolyline(options);
+            poly.setClickable(true);
+            polylines.add(poly);
         }
         else if(markers.size()==3) {
 
@@ -250,12 +319,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             PolylineOptions options = new PolylineOptions().color(Color.RED);
             options.add(markers.get(0).getPosition());
             options.add(markers.get(1).getPosition());
-            mMap.addPolyline(options).setClickable(true);
+            poly =  mMap.addPolyline(options);
+            poly.setClickable(true);
+            polylines.add(poly);
 
             PolylineOptions options1 = new PolylineOptions().color(Color.RED);
             options1.add(markers.get(1).getPosition());
             options1.add(markers.get(2).getPosition());
-            mMap.addPolyline(options1).setClickable(true);
+            poly1 =  mMap.addPolyline(options1);
+            poly1.setClickable(true);
+            polylines.add(poly1);
 
 
         }
@@ -263,18 +336,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             PolylineOptions options = new PolylineOptions().color(Color.RED);
             options.add(markers.get(0).getPosition());
             options.add(markers.get(1).getPosition());
-            mMap.addPolyline(options).setClickable(true);
+            poly =  mMap.addPolyline(options);
+            poly.setClickable(true);
+            polylines.add(poly);
 
             PolylineOptions options1 = new PolylineOptions().color(Color.RED);
             options1.add(markers.get(1).getPosition());
             options1.add(markers.get(2).getPosition());
-            mMap.addPolyline(options1).setClickable(true);
+            poly1 =  mMap.addPolyline(options1);
+            poly1.setClickable(true);
+            polylines.add(poly1);
 
 
             PolylineOptions options2 = new PolylineOptions().color(Color.RED);
             options2.add(markers.get(2).getPosition());
             options2.add(markers.get(3).getPosition());
             mMap.addPolyline(options2).setClickable(true);
+            poly2 =  mMap.addPolyline(options2);
+            poly2.setClickable(true);
+            polylines.add(poly2);
 
 
             PolylineOptions options3 = new PolylineOptions().color(Color.RED);
@@ -282,7 +362,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             options3.add(markers.get(0).getPosition());
             mMap.addPolyline(options3).setClickable(true);
 
-
+            poly3 =  mMap.addPolyline(options2);
+            poly3.setClickable(true);
+            polylines.add(poly3);
         }
 
 
@@ -300,29 +382,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .fillColor(Color.argb(35,0,128,0))
                 .strokeWidth(5);
 
-        for (int i=0; i<POLYGON_SIDES; i++) {
-            options.add(markers.get(i).getPosition());
+        for (int r=0; r<i; r++) {
+            options.add(markers.get(r).getPosition());
         }
         shape = mMap.addPolygon(options);
         shape.setClickable(true);
     }
 
     private void clearMap() {
-
+        mMap.clear();
+        poly.remove();
+        poly1.remove();
+        poly2.remove();
+        poly3.remove();
                 /*if (destMarker != null) {
                     destMarker.remove();
                     destMarker = null;
                 }
-
                 line.remove();*/
-
+//
         for (Marker marker: markers)
             marker.remove();
-
+//
         markers.clear();
-
-        if(shape != null) { shape.remove(); }
-        shape = null;
+//
+//        if(shape != null) { shape.remove(); }
+//        shape = null;
 
         i = 0;
     }
@@ -396,20 +481,3 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
